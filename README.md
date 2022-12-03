@@ -10,7 +10,8 @@ Projeto em grupo realizado para a matéria de Compiladores UEPB - 2022.2
 
 ## :mag_right: Tecnologias utilizadas
 O projeto foi desenvolvido utilizando as seguintes tecnologias: <br />
-- C <br />
+- C 
+- JavaCC<br />
 #
 
 ## :book: Especificações do projeto
