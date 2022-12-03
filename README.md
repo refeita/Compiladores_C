@@ -31,6 +31,8 @@ O projeto foi desenvolvido utilizando as seguintes tecnologias: <br />
 ## :book: Manual de Instrução
 ```
 Instalar projeto
+Executar javac *.java
+Fazer os testes em - Codigo_Teste.txt
 ```
 
 #
