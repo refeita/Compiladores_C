@@ -1,0 +1,834 @@
+options
+{
+  JDK_VERSION = "1.5";
+
+  static = true;
+}
+
+PARSER_BEGIN(Gramatica)
+import java.util.*;
+import java.io.*;
+
+public class Gramatica extends Exception
+{
+  public static void main(String args []) throws ParseException, IOException, Exception
+  {
+    Gramatica parser = new Gramatica(new FileInputStream("Codigo_Teste.txt"));
+    try
+    {
+      Gramatica.start(); // starta!!
+    }
+    catch (ParseException e)
+    {
+      System.out.println("Erros foram encontrados. " + e); // Se erros forem encontrados, o JAVACC lança a Exception
+    }
+  }
+}
+
+PARSER_END(Gramatica)
+
+//As correspondências com expressões regulares nesta produção de
+//expressão regular são simplesmente ignoradas pelo gerenciador de token.
+SKIP :
+{ // SKIPAR Comentários (longos e curtos)
+  " "
+| "\t"
+| "\n"
+| "\r"
+| < "//" (~[ "\n", "\r" ])*
+    (
+      "\n"
+    | "\r"
+    | "\r\n"
+    ) >
+| < "/*" (~[ "*" ])* "*"
+    (
+      "*"
+    | ~[ "*", "/" ] (~[ "*" ])* "*"
+    )*
+    "/" >
+}
+
+// Lista de Literais em C - https://learn.microsoft.com/pt-br/cpp/c-language/
+TOKEN :
+{
+  < INTEGER_LITERAL :
+    < DECIMAL_LITERAL > ([ "l", "L" ])?
+  | < HEX_LITERAL > ([ "l", "L" ])?
+  | < OCTAL_LITERAL > ([ "l", "L" ])? >
+| < #DECIMAL_LITERAL : [ "1"-"9" ] ([ "0"-"9" ])* > // starts with a non zero DIGITO.
+| < #HEX_LITERAL : "0" [ "x", "X" ] ([ "0"-"9", "a"-"f", "A"-"F" ])+ > // starts with 0x or 0X
+| < #OCTAL_LITERAL : "0" ([ "0"-"7" ])* > // starts with 0x or 0X
+| < FLOAT_LITERAL : 
+    ([ "+", "-" ])? ([ "0"-"9" ])+ "." ([ "0"-"9" ])* (< EXPONENT >)? > //fractional form
+| < EXPONENT : [ "e", "E" ] ([ "+", "-" ])? ([ "0"-"9" ])+ > // exponent form
+  // Se a lista de caracteres tiver como prefixo o símbolo ~ ,
+  // o conjunto de caracteres que ela representa será qualquer
+  // caractere UNICODE que não esteja no conjunto especificado.
+| < CHARACTER_LITERAL : // Um literal de caractere é criado colocando
+    // um único caractere entre aspas simples.
+    "\'"
+    (
+      ~[ "\'", "\\", "\n", "\r" ]
+    | "\\" ([ "n", "t", "b", "r", "f", "\\", "\'", "\"" ])
+    )
+    "\'" >
+| < STRING_LITERAL : // Strings literais ou constantes são colocadas entre aspas duplas "".
+    // Uma string contém caracteres semelhantes aos literais de caracteres:
+    // caracteres simples, sequências de escape e caracteres universais.
+    "\""
+    (
+      ~[ "\"", "\\", "\n", "\r" ]
+    | "\\"
+      (
+        [ "n", "t", "b", "r", "f", "\\", "\'", "\"" ]
+      |
+        (
+          [ "\n", "\r" ]
+        | "\r\n"
+        )
+      )
+    )*
+    "\"" >
+}
+
+//Lista de palavras reservadas em C - https://learn.microsoft.com/pt-br/cpp/c-language/
+TOKEN :
+{
+  < AUTO : "auto" >
+| < REGISTER : "register" >
+| < STATIC : "static" >
+| < EXTERN : "extern" >
+| < TYPEDEF : "typedef" >
+| < VOID : "void" >
+| < CHAR : "char" >
+| < SHORT : "short" >
+| < INT : "int" >
+| < LONG : "long" >
+| < FLOAT : "float" >
+| < DOUBLE : "double" >
+| < SIGNED : "signed" >
+| < UNSIGNED : "unsigned" >
+| < CONST : "const" >
+| < VOLATILE : "volatile" >
+| < CASE : "case" >
+| < DFLT : "default" > // Lexical token name "DFLT" is the same as that of a lexical state.
+| < IF : "if" >
+| < ELSE : "else" >
+| < SWITCH : "switch" >
+| < WHILE : "while" >
+| < FOR : "for" >
+| < DO : "do" >
+| < GOTO : "goto" >
+| < CONTINUE : "continue" >
+| < BREAK : "break" >
+| < RETURN : "return" >
+| < ENUM : "enum" >
+| < SIZEOF : "sizeof" >
+| < STRUCT : "struct" >
+| < UNION : "union" >
+}
+
+TOKEN :
+{
+  < PRINT : "printf" > // SAÍDA
+| < SCAN : "scanf" > // ENTRADA
+}
+
+//Identificadores em C - https://learn.microsoft.com/pt-br/cpp/c-language/
+/*
+
+Sintaxe
+identifier:
+    nondigit
+    identifiernondigit
+    identifierdigit
+
+nondigit: uma destas opções
+    _ a b c d e f g h i j k l mn o p q r s t u v w x y z
+    A B C D E F G H I J K L MN O P Q R S T U V W X Y Z
+
+digit: uma destas opções
+    0 1 2 3 4 5 6 7 8 9
+*/
+TOKEN :
+{
+  < IDENTIFICADOR :
+    < LETRA >
+    (
+      < LETRA >
+    | < DIGITO >
+    )* >
+| < #LETRA : [ "A"-"Z", "_", "a"-"z" ] >
+| < #DIGITO : [ "0"-"9" ] >
+}
+
+//Delimitadores e Simbolos em C - https://learn.microsoft.com/pt-br/cpp/c-language/
+TOKEN :
+{
+  < AC : "{" > // ABRE CHAVES
+| < FC : "}" > // FECHA CHAVES
+| < AP : "(" > // ABRE PARENTESES
+| < FP : ")" > // FECHA PARENTESES
+| < PV : ";" > // PONTO VIRGULA
+| < P : "." > // PONTO
+| < ACO : "[" > // ABRE COLCHETES
+| < FCO : "]" > // FECHA COLCHETES
+| < VIRGULA : "," >
+| < IGUAL : "=" >
+| < INCREMENTO : "++" >
+| < DECREMENTO : "--" >
+| < MAIORIGUAL : ">=" >
+| < MENORIGUAL : "<=" >
+| < MAIOR : ">" >
+| < MENOR : "<" >
+| < IGUALIGUAL : "==" >
+| < DIFERENTE : "!=" >
+| < SOMA : "+" >
+| < SUBTRACAO : "-" >
+| < MULTIPLICACAO : "*" >
+| < DIVISAO : "/" >
+}
+
+int start() throws Exception :
+{}
+{
+  (
+    Programa()
+  )+
+  < EOF >
+  {
+    System.out.print("Gramatica Aceita. \n");
+    return 0;
+  }
+}
+
+void Programa() throws Exception :
+{}
+{
+  (
+    DefinicaoFuncao()
+  )
+  {
+  }
+}
+
+void DefinicaoFuncao() throws Exception :
+// tipo_de_retorno nome_da_função (listagem de parâmetros) { corpo_da_funcao }
+{
+  Token t = null; // Esta variável contém o último token consumido pelo parser
+}
+{
+  (
+    [
+      LOOKAHEAD(ListaDeclaracao()) // "Olha na frente" pra ver se possui algum ListaDeclarao()
+      ListaDeclaracao()
+    ]
+    [ ListaDeclaracoes() ]
+    {
+    }
+    EspecificadoresdeTipo()  // tipo_de_retorno
+    t = < IDENTIFICADOR > // nome_da_função
+    {
+    }
+    < AP > [ ListaTiposParametros() ] < FP > // (listagem de parâmetros)
+    {
+    }
+    CorpoFuncao() // { corpo_da_funcao }
+  )
+  {
+  }
+}
+
+void ListaTiposParametros() :
+{}
+{
+  ListadeParametros()
+  {
+  }
+}
+
+void ListadeParametros() :
+{}
+{
+  DeclaracaoParametro() // ( tipo_do_parametro identificador_do_parametro , ...)
+  (
+    LOOKAHEAD(2) // Examina os dois proximos simbolos para decidir qual regra escolher
+    // Ou seja, ele verifica se tem outro parametro depois
+    // (( tipo_do_parametro identificador_do_parametro , ...))
+    "," DeclaracaoParametro()
+  )* // PODE TER ZERO OU MAIS PARAMETROS
+  {
+  }
+}
+
+void DeclaracaoParametro() :
+{
+}
+{
+  EspecificadoresdeTipo() VariavelParam() // ( tipo_do_parametro identificador_do_parametro , ...)
+  {										 // ( int/float/double  identificador_do_parametro , ...)
+  }
+}
+
+void CorpoFuncao() :
+{}
+{
+  "{"
+  [
+    LOOKAHEAD(ListaDeclaracao()) // "Olha na frente" pra ver se possui algum ListaDeclarao()
+    ListaDeclaracao()
+  ]
+  [ ListaDeclaracoes() ] 
+  "}"
+  {
+  }
+}
+
+void ListaDeclaracoes() :
+{}
+{
+  (
+    DeclaracaoTipo()
+  )+
+  {
+  }
+}
+
+void DeclaracaoTipo() :
+{}
+{
+  (
+    DeclaracaoExpressao()
+  | 
+    CorpoFuncao()
+  | 
+    DeclaracaoCondicional()
+  | 
+    DeclaracaoIteracao()
+  | 
+    DeclaracaoDesvio()
+  )
+  {
+  }
+}
+
+void DeclaracaoCondicional() : // IF ELSE 
+{
+}
+{
+  (
+    < IF > "(" Expressao() ")"
+    {
+    // if (condição)
+    // {
+    //    instrução ou instruções para condição verdadeira;
+    // }
+    }
+    DeclaracaoTipo()
+    {
+    }
+    [
+      LOOKAHEAD(2)
+      < ELSE > 
+      //
+      //if (condição){
+      //		instrução ou instruções para condição verdadeira;      //}
+      //else{
+      //	comandos;
+      //}
+      DeclaracaoTipo()
+    ]
+    {
+    }
+  )
+  {
+  }
+}
+
+void DeclaracaoIteracao() : // WHILE e FOR
+{
+}
+{
+  (
+    < WHILE > "(" Expressao() ")" // SINTAXE WHILE : 
+    //while (condição)
+    //{
+    //Instrução ou bloco de instruções;
+    // }
+    {
+    }
+    DeclaracaoTipo()
+    {
+    }
+  | 
+    < FOR > "(" [ Expressao() ] ";"
+    {
+    // for(valor_inicial; condição_final; valor_incremento)
+    // {
+    // instruções;
+    // }
+    }
+    [ Expressao() ]
+    {
+    }
+    ";"
+    {
+    }
+    [ Expressao() ] ")"
+    {
+    }
+    DeclaracaoTipo()
+    {
+    }
+  )
+  {
+  }
+}
+
+void DeclaracaoDesvio() : // Não coloquei GOTO
+{
+  Token t = null;
+}
+{
+  (
+    < CONTINUE > ";"
+    {
+    }
+  | 
+    < BREAK > ";"
+    {
+    }
+  | 
+    < RETURN > [ Expressao() ] ";"
+  )
+  {
+  }
+}
+
+void ListaDeclaracao() :
+{}
+{
+  (
+    LOOKAHEAD(EspecificadoresDeclaracao()) // "Olha na frente" pra ver se possui algum ListaDeclarao()
+    EspecificadoresDeclaracao() // Um ou mais especificadores
+  )+
+  {
+  }
+}
+
+void EspecificadoresDeclaracao() :
+{}
+{
+  DeclaracaoEspecificadores() ListaDeclaradoresInicializacao() ";"
+  {
+  }
+}
+
+void DeclaracaoEspecificadores() : // AQUI ELE VERIFICA SE TEM ALGUM ESPECIFICADOR E FICA CHAMANDO 
+{}
+{
+  (
+    EspecificadoresdeTipo()
+    [
+      LOOKAHEAD(DeclaracaoEspecificadores())
+      DeclaracaoEspecificadores()
+    ]
+  )
+  {
+  }
+}
+
+void EspecificadoresdeTipo() : // DATATYPE (especificados nos TOKENS)
+{
+  Token t = null;
+}
+{
+  (
+    t = < VOID >
+  | t = < CHAR >
+  | t = < INT >
+  | t = < FLOAT >
+  | t = < DOUBLE >
+  )
+  {
+  }
+}
+
+void ListaDeclaradoresInicializacao() :
+{}
+{
+  DeclaradorInit()
+  (
+    "," DeclaradorInit()
+    {
+    }
+  )*
+}
+
+void DeclaradorInit() :
+{
+  Token t = null;
+}
+{
+  VariavelParam()
+  [
+    "=" 
+    Inicializador()
+    {
+    }
+  ]
+  {
+  }
+}
+
+void VariavelParam() :
+{}
+{
+  DeclaracaoDireta()
+  {
+  }
+}
+
+void DeclaracaoDireta() :
+{
+  Token t = null;
+}
+{
+  (
+    t = < IDENTIFICADOR > // recebe um identificador
+  | "(" VariavelParam() ")"
+  )
+  {
+  }
+}
+
+void ListaInicializadores() :
+{
+}
+{
+  Inicializador()
+  (
+    LOOKAHEAD(2)
+    "," Inicializador()
+  )*
+  {
+  }
+}
+
+void Inicializador() :
+{}
+{
+  (
+    ExpressaoAtribuicao() // BUSCA O SINAL DE ATRIBUIÇÃO, OU SEJA, O = (IGUAL)
+  )
+  {
+  }
+}
+
+void ExpressaoConstante() :
+{}
+{
+  ExpressaoCondicional()
+  {
+  }
+}
+
+void DeclaracaoExpressao() :
+{}
+{
+  [ Expressao() ] ";" [ < PRINT > ] [ < SCAN > ]
+  {
+  }
+}
+
+void Expressao() :
+{
+}
+{
+  ExpressaoAtribuicao()
+  (
+    "," ExpressaoAtribuicao()
+  )*
+  {
+  }
+}
+
+void ExpressaoAtribuicao() :
+{
+}
+{
+  (
+    LOOKAHEAD(ExpressaoUnaria() OperadorAtribuicao())
+    ExpressaoUnaria() OperadorAtribuicao()
+    {
+    }
+    ExpressaoAtribuicao()
+    {
+    }
+  | LOOKAHEAD(1)
+    ExpressaoCondicional()
+  )
+  {
+  }
+}
+
+void OperadorAtribuicao() :
+{
+  Token t = null;
+}
+{
+  (
+    t = "="
+  | t = "*="
+  | t = "/="
+  | t = "%="
+  | t = "+="
+  | t = "-="
+  | t = "<<="
+  | t = ">>="
+  | t = "&="
+  | t = "^="
+  | t = "|="
+  )
+  {
+  }
+}
+
+void ExpressaoUnaria() :
+{
+  Token t = null;
+}
+{
+  (
+    LOOKAHEAD(3)
+    ExpressaoIncreDecre()
+  | t = "++" 
+    ExpressaoUnaria()
+  | t = "--" 
+    ExpressaoUnaria()
+  | t = "-" 
+    ExpressaoUnaria()
+  | t = "&" 
+    ExpressaoUnaria()
+  | t = "*" 
+    ExpressaoUnaria()
+  | t = "~" 
+    ExpressaoUnaria()
+  | t = "!" 
+    ExpressaoUnaria()
+  )
+  {
+  }
+}
+
+void ExpressaoIncreDecre() :
+{
+  Token t = null;
+}
+{
+  (
+    ExpressaoPrimaria()
+    (
+      "[" Expressao() "]"
+    | t = "++"
+    | t = "--"
+    )*
+  )
+  {
+  }
+}
+
+void ExpressaoPrimaria() :
+{
+  Token t;
+}
+{
+  (
+    t = < IDENTIFICADOR >
+  | Constant()
+  | "(" Expressao() ")"
+  )
+  {
+  }
+}
+
+void ExpressaoCondicional() :
+{
+}
+{
+  OULogico()
+  {
+  }
+}
+
+void OULogico() :
+{
+  Token t = null;
+}
+{
+  ELogico()
+  [
+    t = "||" 
+    OULogico()
+    {
+    }
+  ]
+}
+
+void ELogico() :
+{
+  Token t = null;
+}
+{
+  ORbits()
+  [
+    t = "&&" 
+    ELogico()
+    {
+    }
+  ]
+}
+
+void ORbits() :
+{
+  Token t = null;
+}
+{
+  ORExclusivoBits()
+  [
+    t = "|" 
+    ORbits()
+    {
+    }
+  ]
+}
+
+void ORExclusivoBits() :
+{
+  Token t = null;
+}
+{
+  AndBits()
+  [
+    t = "^" 
+    ORExclusivoBits()
+    {
+    }
+  ]
+}
+
+void AndBits() :
+{
+  Token t = null;
+}
+{
+  ExpressaoIgualdade()
+  [
+    t = "&" 
+    AndBits()
+    {
+    }
+  ]
+}
+
+void ExpressaoIgualdade() :
+{
+  Token t = null;
+}
+{
+  ExpressaoRelacional()
+  [
+    (
+      t = "=="
+    | t = "!="
+    )
+    ExpressaoIgualdade()
+    {
+    }
+  ]
+}
+
+void ExpressaoRelacional() :
+{
+  Token t = null;
+}
+{
+  DeslocamentoBits()
+  [
+    (
+      t = "<"
+    | t = ">"
+    | t = "<="
+    | t = ">="
+    )
+    ExpressaoRelacional()
+    {
+    }
+  ]
+}
+
+void DeslocamentoBits() :
+{
+  Token t = null;
+}
+{
+  ExpressaoAditiva()
+  [
+    (
+      t = "<<"
+    | t = ">>"
+    )
+    DeslocamentoBits()
+    {
+    }
+  ]
+}
+
+void ExpressaoAditiva() :
+{
+  Token t = null;
+}
+{
+  ExpressaoMultiplicativa()
+  [
+    (
+      t = "+"
+    | t = "-"
+    )
+    ExpressaoAditiva()
+    {
+    }
+  ]
+}
+
+void ExpressaoMultiplicativa() :
+{
+  Token t = null;
+}
+{
+  ExpressaoUnaria()
+  [
+    (
+      t = "*"
+    | t = "/"
+    | t = "%"
+    )
+    ExpressaoMultiplicativa()
+    {
+    }
+  ]
+}
+
+void Constant() :
+{
+  Token t = null;
+}
+{
+  (
+    t = < INTEGER_LITERAL >
+  | t = < FLOAT_LITERAL >
+  | t = < CHARACTER_LITERAL >
+  | t = < STRING_LITERAL >
+  )
+}

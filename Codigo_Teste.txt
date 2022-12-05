@@ -1,0 +1,87 @@
+/*
+Grupo: 
+Rafaela Candido, 
+Gustavo Barros, 
+Elioenai Roberto, 
+Mariana Ramos e 
+João Lucas
+*/
+
+
+// O TESTE INICIAL
+
+		if (((a+b) > 3) && (d<9)){
+		}
+
+// Funcao
+    
+		int somaDeAtributos(){
+		 	int res;
+		 	int op;
+		    res=res+1;
+		    
+		    //Entrada
+		    
+		    printf("Digite um valor: ");
+		    scanf ("%d", &op);
+		    res=5+op;
+		    
+		    //Saida
+		    
+		    printf("O resultado eh: %d",res);
+		    return res;
+		}
+
+// Funcao 
+
+		char modificaTexto(char c, int a){
+		  	char texto;
+		    char texto2;
+		  	char texto3='C';
+		  	texto='B';
+		  	texto2='A';
+		  	printf("O novo texto eh: %c",texto3);
+		}
+  
+//main
+		int main (){
+		
+			int Valor_1=2;
+			int Valor_2=5;
+			int res;
+			double Valor_3=4.52;
+			float Valor_4 = 6.6;
+			char letra='b';
+		
+			//Condicional
+			
+		    if(Valor_3!=4.52||Valor_4==6.6){
+		    	Valor_2*=2;
+		    	Valor_1-=4;
+		      if((1 + 2) > 5 && (4 + 5) < 6){
+		        break;
+		      }
+			}
+			
+			//Condicional Composto
+			
+		    else
+		    {
+		        res = 2 * 2;
+		        return res;
+		    }
+
+	//Lacos
+
+		    while (res<100)
+		    {
+		    	for(i=0;i<10;i++){
+			    	if((1 + 2) > 5 && (4 + 5) < 6){
+			        }
+		        res = res + 1;
+		        res--;
+		        res++;
+		        Valor_2+=7;
+		        }
+		    }    
+			}
